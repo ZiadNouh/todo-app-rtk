@@ -54,7 +54,6 @@ const TaskBoard = () => {
       const activeStatus = active.data.current?.status as Task["status"];
       const targetStatus = over.data.current?.status as Task["status"];
 
-      // If dragging within the same column
       if (activeStatus === targetStatus) {
         const filteredTasks = filterTasks(activeStatus);
         const oldIndex = filteredTasks.findIndex(
@@ -64,9 +63,7 @@ const TaskBoard = () => {
 
         const reorderedTasks = arrayMove(filteredTasks, oldIndex, newIndex);
         dispatch(reorderTasks({ status: activeStatus, tasks: reorderedTasks }));
-      }
-      // If dragging between columns
-      else if (activeStatus !== targetStatus) {
+      } else if (activeStatus !== targetStatus) {
         dispatch(
           updateTaskStatus({
             id: active.id as string,

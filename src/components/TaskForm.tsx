@@ -1,80 +1,97 @@
-import { useFormik } from "formik";
+import { useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { addTask } from "../features/tasks/taskSlice";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const TaskForm = () => {
   const dispatch = useDispatch();
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const formik = useFormik({
-    initialValues: {
-      name: "",
-      description: "",
-    },
-    validationSchema: Yup.object({
-      name: Yup.string()
-        .required("Task name is required")
-        .min(3, "Task name must be at least 3 characters")
-        .max(50, "Task name must be at most 50 characters"),
-      description: Yup.string()
-        .required("Description is required")
-        .min(10, "Description must be at least 10 characters")
-        .max(200, "Description must be at most 200 characters"),
-    }),
-    onSubmit: (values) => {
-      dispatch(addTask(values));
-      formik.resetForm();
-    },
+  const validationSchema = Yup.object({
+    name: Yup.string()
+      .required("Task name is required")
+      .min(3, "Task name must be at least 3 characters")
+      .max(50, "Task name must be at most 50 characters"),
+    description: Yup.string()
+      .required("Description is required")
+      .min(10, "Description must be at least 10 characters")
+      .max(200, "Description must be at most 200 characters"),
   });
 
   return (
-    <form onSubmit={formik.handleSubmit} className="space-y-4">
-      <div>
-        <input
-          type="text"
-          name="name"
-          placeholder="Task Name"
-          value={formik.values.name}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`w-full p-2 border rounded ${
-            formik.touched.name && formik.errors.name
-              ? "border-red-500"
-              : "border-gray-300"
-          }`}
-        />
-        {formik.touched.name && formik.errors.name && (
-          <p className="text-red-500 text-sm mt-1">{formik.errors.name}</p>
-        )}
+    <div className="relative">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-xl font-semibold">Create a New Task</h2>
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="p-2 rounded hover:bg-gray-100 cursor-pointer"
+        >
+          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </button>
       </div>
 
-      <div>
-        <textarea
-          name="description"
-          placeholder="Task Description"
-          value={formik.values.description}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          className={`w-full p-2 border rounded ${
-            formik.touched.description && formik.errors.description
-              ? "border-red-500"
-              : "border-gray-300"
-          }`}
-        />
-        {formik.touched.description && formik.errors.description && (
-          <p className="text-red-500 text-sm mt-1">
-            {formik.errors.description}
-          </p>
-        )}
-      </div>
+      {isExpanded && (
+        <Formik
+          initialValues={{ name: "", description: "" }}
+          validationSchema={validationSchema}
+          onSubmit={(values, { resetForm }) => {
+            dispatch(addTask(values));
+            resetForm();
+            setIsExpanded(false);
+          }}
+        >
+          {({ errors, touched }) => (
+            <Form className="space-y-4">
+              <div>
+                <Field
+                  name="name"
+                  type="text"
+                  placeholder="Task Name"
+                  className={`w-full p-2 border rounded ${
+                    touched.name && errors.name
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+                <ErrorMessage
+                  name="name"
+                  component="p"
+                  className="text-red-500 text-sm mt-1"
+                />
+              </div>
 
-      <button
-        type="submit"
-        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        Add Task
-      </button>
-    </form>
+              <div>
+                <Field
+                  name="description"
+                  as="textarea"
+                  placeholder="Task Description"
+                  className={`w-full p-2 border rounded ${
+                    touched.description && errors.description
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+                <ErrorMessage
+                  name="description"
+                  component="p"
+                  className="text-red-500 text-sm mt-1"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
+              >
+                Add Task
+              </button>
+            </Form>
+          )}
+        </Formik>
+      )}
+    </div>
   );
 };
 

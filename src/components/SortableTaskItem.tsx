@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -9,8 +11,6 @@ import {
 } from "../features/tasks/taskSlice";
 import { useDispatch } from "react-redux";
 import { Trash2, Edit, ChevronDown } from "lucide-react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
 
 interface SortableTaskItemProps {
   task: Task;
@@ -33,30 +33,15 @@ const SortableTaskItem: React.FC<SortableTaskItemProps> = ({ task }) => {
     data: { status: task.status },
   });
 
-  const formik = useFormik({
-    initialValues: {
-      name: task.name,
-      description: task.description,
-    },
-    validationSchema: Yup.object({
-      name: Yup.string()
-        .required("Task name is required")
-        .min(3, "Task name must be at least 3 characters")
-        .max(50, "Task name must be at most 50 characters"),
-      description: Yup.string()
-        .required("Description is required")
-        .min(10, "Description must be at least 10 characters")
-        .max(200, "Description must be at most 200 characters"),
-    }),
-    onSubmit: (values) => {
-      dispatch(
-        editTask({
-          id: task.id,
-          ...values,
-        })
-      );
-      setIsEditing(false);
-    },
+  const validationSchema = Yup.object({
+    name: Yup.string()
+      .required("Task name is required")
+      .min(3, "Task name must be at least 3 characters")
+      .max(50, "Task name must be at most 50 characters"),
+    description: Yup.string()
+      .required("Description is required")
+      .min(10, "Description must be at least 10 characters")
+      .max(200, "Description must be at most 200 characters"),
   });
 
   const handleDelete = () => {
@@ -84,60 +69,73 @@ const SortableTaskItem: React.FC<SortableTaskItemProps> = ({ task }) => {
 
   if (isEditing) {
     return (
-      <form
-        onSubmit={formik.handleSubmit}
-        className="space-y-2 p-4 bg-gray-50 rounded-lg"
+      <Formik
+        initialValues={{
+          name: task.name,
+          description: task.description,
+        }}
+        validationSchema={validationSchema}
+        onSubmit={(values) => {
+          dispatch(
+            editTask({
+              id: task.id,
+              ...values,
+            })
+          );
+          setIsEditing(false);
+        }}
       >
-        <div>
-          <input
-            name="name"
-            value={formik.values.name}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            className={`w-full p-2 border rounded ${
-              formik.touched.name && formik.errors.name
-                ? "border-red-500"
-                : "border-gray-300"
-            }`}
-          />
-          {formik.touched.name && formik.errors.name && (
-            <p className="text-red-500 text-sm mt-1">{formik.errors.name}</p>
-          )}
-        </div>
-        <div>
-          <textarea
-            name="description"
-            value={formik.values.description}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            className={`w-full p-2 border rounded ${
-              formik.touched.description && formik.errors.description
-                ? "border-red-500"
-                : "border-gray-300"
-            }`}
-          />
-          {formik.touched.description && formik.errors.description && (
-            <p className="text-red-500 text-sm mt-1">
-              {formik.errors.description}
-            </p>
-          )}
-        </div>
-        <div className="flex space-x-2">
-          <button
-            type="submit"
-            className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
-          >
-            Save
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsEditing(false)}
-            className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+        {({ errors, touched }) => (
+          <Form className="space-y-2 p-4 bg-gray-50 rounded-lg">
+            <div>
+              <Field
+                name="name"
+                className={`w-full p-2 border rounded ${
+                  touched.name && errors.name
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
+              />
+              <ErrorMessage
+                name="name"
+                component="p"
+                className="text-red-500 text-sm mt-1"
+              />
+            </div>
+            <div>
+              <Field
+                name="description"
+                as="textarea"
+                className={`w-full p-2 border rounded ${
+                  touched.description && errors.description
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
+              />
+              <ErrorMessage
+                name="description"
+                component="p"
+                className="text-red-500 text-sm mt-1"
+              />
+            </div>
+            <div className="flex space-x-2">
+              <button
+                type="submit"
+                className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </Form>
+        )}
+      </Formik>
     );
   }
 
@@ -157,13 +155,13 @@ const SortableTaskItem: React.FC<SortableTaskItemProps> = ({ task }) => {
         <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => setIsEditing(true)}
-            className="text-blue-500 hover:text-blue-700"
+            className="text-blue-500 hover:text-blue-700 cursor-pointer"
           >
             <Edit size={16} />
           </button>
           <button
             onClick={handleDelete}
-            className="text-red-500 hover:text-red-700"
+            className="text-red-500 hover:text-red-700 cursor-pointer"
           >
             <Trash2 size={16} />
           </button>
@@ -172,7 +170,7 @@ const SortableTaskItem: React.FC<SortableTaskItemProps> = ({ task }) => {
       <div className="mt-3 relative">
         <button
           onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-          className="flex items-center space-x-1 bg-gray-100 px-3 py-1 rounded-lg text-sm text-gray-700 hover:bg-gray-200"
+          className="flex items-center space-x-1 bg-gray-100 px-3 py-1 rounded-lg text-sm text-gray-700 hover:bg-gray-200 cursor-pointer"
         >
           <span>{task.status}</span>
           <ChevronDown size={16} />
