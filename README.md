@@ -1,50 +1,63 @@
-# React + TypeScript + Vite
+# Task Manager with Drag-and-Drop
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React-based Task Manager application featuring drag-and-drop functionality using `@dnd-kit`, task editing with `Formik` and `Yup` for validation, and Redux for state management. This app allows users to add, edit, delete, and reorder tasks seamlessly.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Drag-and-Drop**: Reorder tasks using intuitive drag-and-drop interactions powered by `@dnd-kit`.
+- **Task Management**: Add, edit, delete tasks with real-time updates.
+- **Form Validation**: Robust form validation using `Formik` and `Yup`.
+- **Status Updates**: Change task statuses (To-Do, In Progress, Done) with dropdown selection.
+- **Confirmation Modals**: Confirm deletions to prevent accidental data loss.
+- **Responsive UI**: Clean, modern design with TailwindCSS.
 
-## Expanding the ESLint configuration
+## Demo
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+![Task Manager Demo](link-to-your-demo-or-screenshot)
 
-- Configure the top-level `parserOptions` property like this:
+## Technologies Used
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- **Frontend:** React, TypeScript
+- **State Management:** Redux Toolkit
+- **Drag-and-Drop:** @dnd-kit
+- **Form Handling & Validation:** Formik, Yup
+- **Icons:** Lucide-React
+- **Styling:** TailwindCSS
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Installation
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+   cd YOUR_REPO_NAME
+   ```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Run the application:**
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
+
+4. **Build for production:**
+   ```bash
+   npm run build
+   # or
+   yarn build
+   ```
+
+## Usage
+
+1. **Adding a Task:** Use the form to add a task with a name and description.
+2. **Editing a Task:** Click the edit icon to modify the task details.
+3. **Deleting a Task:** Click the trash icon and confirm the deletion in the modal.
+4. **Reordering Tasks:** Drag and drop tasks to reorder them.
+5. **Changing Task Status:** Use the dropdown to update task status.
+
