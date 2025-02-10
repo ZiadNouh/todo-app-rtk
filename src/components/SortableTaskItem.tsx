@@ -11,6 +11,7 @@ import {
 } from "../features/tasks/taskSlice";
 import { useDispatch } from "react-redux";
 import { Trash2, Edit, ChevronDown } from "lucide-react";
+import DeleteConfirmationModal from "./modals/DeleteConfirmation";
 
 interface SortableTaskItemProps {
   task: Task;
@@ -20,6 +21,7 @@ const SortableTaskItem: React.FC<SortableTaskItemProps> = ({ task }) => {
   const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     attributes,
@@ -45,9 +47,12 @@ const SortableTaskItem: React.FC<SortableTaskItemProps> = ({ task }) => {
   });
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      dispatch(deleteTask(task.id));
-    }
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    dispatch(deleteTask(task.id));
+    setIsModalOpen(false);
   };
 
   const handleStatusChange = (newStatus: Task["status"]) => {
@@ -121,14 +126,14 @@ const SortableTaskItem: React.FC<SortableTaskItemProps> = ({ task }) => {
             <div className="flex space-x-2">
               <button
                 type="submit"
-                className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
+                className="bg-green-500 text-white p-2 rounded hover:bg-green-600 cursor-pointer"
               >
                 Save
               </button>
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
+                className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 cursor-pointer"
               >
                 Cancel
               </button>
@@ -189,6 +194,11 @@ const SortableTaskItem: React.FC<SortableTaskItemProps> = ({ task }) => {
           </div>
         )}
       </div>
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };
