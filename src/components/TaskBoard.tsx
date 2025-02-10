@@ -5,10 +5,17 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragStartEvent,
+  DragEndEvent,
 } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Task, updateTaskStatus } from "../features/tasks/taskSlice";
+import {
+  Task,
+  updateTaskStatus,
+  reorderTasks,
+} from "../features/tasks/taskSlice";
 import TaskList from "./TaskList";
 import SortableTaskItem from "./SortableTaskItem";
 
@@ -35,22 +42,34 @@ const TaskBoard = () => {
         task.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const handleDragStart = (event: any) => {
+  const handleDragStart = (event: DragStartEvent) => {
     const task = tasks.find((t) => t.id === event.active.id);
     if (task) setActiveTask(task);
   };
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over) {
-      const targetStatus =
-        over.data.current?.status || active.data.current?.status;
+      const activeStatus = active.data.current?.status as Task["status"];
+      const targetStatus = over.data.current?.status as Task["status"];
 
-      if (targetStatus && active.id !== over.id) {
+      // If dragging within the same column
+      if (activeStatus === targetStatus) {
+        const filteredTasks = filterTasks(activeStatus);
+        const oldIndex = filteredTasks.findIndex(
+          (task) => task.id === active.id
+        );
+        const newIndex = filteredTasks.findIndex((task) => task.id === over.id);
+
+        const reorderedTasks = arrayMove(filteredTasks, oldIndex, newIndex);
+        dispatch(reorderTasks({ status: activeStatus, tasks: reorderedTasks }));
+      }
+      // If dragging between columns
+      else if (activeStatus !== targetStatus) {
         dispatch(
           updateTaskStatus({
-            id: active.id,
+            id: active.id as string,
             status: targetStatus,
           })
         );

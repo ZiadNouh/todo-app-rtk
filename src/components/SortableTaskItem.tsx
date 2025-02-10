@@ -28,7 +28,10 @@ const SortableTaskItem: React.FC<SortableTaskItemProps> = ({ task }) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id });
+  } = useSortable({
+    id: task.id,
+    data: { status: task.status },
+  });
 
   const formik = useFormik({
     initialValues: {
