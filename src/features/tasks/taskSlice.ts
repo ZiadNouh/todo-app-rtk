@@ -28,6 +28,17 @@ const taskSlice = createSlice({
       };
       state.tasks.push(newTask);
     },
+    editTask: (
+      state,
+      action: PayloadAction<Partial<Task> & { id: string }>
+    ) => {
+      const index = state.tasks.findIndex(
+        (task) => task.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.tasks[index] = { ...state.tasks[index], ...action.payload };
+      }
+    },
     updateTaskStatus: (
       state,
       action: PayloadAction<{ id: string; status: Task["status"] }>
@@ -52,6 +63,6 @@ const taskSlice = createSlice({
   },
 });
 
-export const { addTask, updateTaskStatus, reorderTasks, deleteTask } =
+export const { addTask, editTask, updateTaskStatus, reorderTasks, deleteTask } =
   taskSlice.actions;
 export default taskSlice.reducer;

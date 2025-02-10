@@ -1,13 +1,16 @@
-import { DndContext, DragOverlay, closestCorners } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Task,
-  updateTaskStatus,
-  reorderTasks,
-} from "../features/tasks/taskSlice";
+import { Task, updateTaskStatus } from "../features/tasks/taskSlice";
 import TaskList from "./TaskList";
+import SortableTaskItem from "./SortableTaskItem";
 
 const TaskBoard = () => {
   const dispatch = useDispatch();
@@ -16,6 +19,14 @@ const TaskBoard = () => {
   );
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   const filterTasks = (status: Task["status"]) =>
     tasks.filter(
@@ -31,34 +42,19 @@ const TaskBoard = () => {
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    if (!over) return;
 
-    const activeTask = tasks.find((t) => t.id === active.id);
-    const overTask = tasks.find((t) => t.id === over.id);
+    if (over) {
+      const targetStatus =
+        over.data.current?.status || active.data.current?.status;
 
-    if (!activeTask || !overTask) return;
-
-    if (activeTask.status === overTask.status) {
-      const filteredTasks = filterTasks(activeTask.status);
-      const oldIndex = filteredTasks.findIndex((t) => t.id === active.id);
-      const newIndex = filteredTasks.findIndex((t) => t.id === over.id);
-
-      if (oldIndex !== newIndex) {
-        const reorderedTasks = arrayMove(filteredTasks, oldIndex, newIndex);
+      if (targetStatus && active.id !== over.id) {
         dispatch(
-          reorderTasks({
-            status: activeTask.status,
-            tasks: reorderedTasks,
+          updateTaskStatus({
+            id: active.id,
+            status: targetStatus,
           })
         );
       }
-    } else {
-      dispatch(
-        updateTaskStatus({
-          id: active.id,
-          status: overTask.status,
-        })
-      );
     }
 
     setActiveTask(null);
@@ -73,8 +69,8 @@ const TaskBoard = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="p-2 border rounded w-full"
       />
-
       <DndContext
+        sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -88,14 +84,8 @@ const TaskBoard = () => {
             />
           ))}
         </div>
-
         <DragOverlay>
-          {activeTask ? (
-            <div className="p-2 mb-2 bg-white rounded shadow">
-              <h3 className="font-medium">{activeTask.name}</h3>
-              <p className="text-gray-600">{activeTask.description}</p>
-            </div>
-          ) : null}
+          {activeTask ? <SortableTaskItem task={activeTask} /> : null}
         </DragOverlay>
       </DndContext>
     </div>
