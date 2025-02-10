@@ -63,13 +63,32 @@ const TaskBoard = () => {
 
         const reorderedTasks = arrayMove(filteredTasks, oldIndex, newIndex);
         dispatch(reorderTasks({ status: activeStatus, tasks: reorderedTasks }));
-      } else if (activeStatus !== targetStatus) {
+      } else {
         dispatch(
           updateTaskStatus({
             id: active.id as string,
             status: targetStatus,
           })
         );
+        const targetTasks = filterTasks(targetStatus);
+        const newIndex = targetTasks.findIndex((task) => task.id === over.id);
+
+        const reorderedTasks = [...targetTasks];
+        const movedTask = tasks.find((task) => task.id === active.id);
+
+        if (movedTask) {
+          reorderedTasks.splice(
+            newIndex === -1 ? targetTasks.length : newIndex,
+            0,
+            {
+              ...movedTask,
+              status: targetStatus,
+            }
+          );
+          dispatch(
+            reorderTasks({ status: targetStatus, tasks: reorderedTasks })
+          );
+        }
       }
     }
 

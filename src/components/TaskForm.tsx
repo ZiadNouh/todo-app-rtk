@@ -21,7 +21,7 @@ const TaskForm = () => {
   });
 
   return (
-    <div className="relative">
+    <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-xl font-semibold">Create a New Task</h2>
         <button
