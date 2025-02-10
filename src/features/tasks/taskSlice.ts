@@ -12,8 +12,26 @@ interface TaskState {
   tasks: Task[];
 }
 
+const loadTasksFromLocalStorage = (): Task[] => {
+  try {
+    const storedTasks = localStorage.getItem("tasks");
+    return storedTasks ? JSON.parse(storedTasks) : [];
+  } catch (error) {
+    console.error("Failed to load tasks from localStorage:", error);
+    return [];
+  }
+};
+
+const saveTasksToLocalStorage = (tasks: Task[]) => {
+  try {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  } catch (error) {
+    console.error("Failed to save tasks to localStorage:", error);
+  }
+};
+
 const initialState: TaskState = {
-  tasks: [],
+  tasks: loadTasksFromLocalStorage(),
 };
 
 const taskSlice = createSlice({
@@ -27,6 +45,7 @@ const taskSlice = createSlice({
         ...action.payload,
       };
       state.tasks.push(newTask);
+      saveTasksToLocalStorage(state.tasks);
     },
     editTask: (
       state,
@@ -37,6 +56,7 @@ const taskSlice = createSlice({
       );
       if (index !== -1) {
         state.tasks[index] = { ...state.tasks[index], ...action.payload };
+        saveTasksToLocalStorage(state.tasks);
       }
     },
     updateTaskStatus: (
@@ -46,6 +66,7 @@ const taskSlice = createSlice({
       const task = state.tasks.find((t) => t.id === action.payload.id);
       if (task) {
         task.status = action.payload.status;
+        saveTasksToLocalStorage(state.tasks);
       }
     },
     reorderTasks: (
@@ -53,12 +74,13 @@ const taskSlice = createSlice({
       action: PayloadAction<{ status: Task["status"]; tasks: Task[] }>
     ) => {
       const { status, tasks } = action.payload;
-
       state.tasks = state.tasks.filter((t) => t.status !== status);
       state.tasks.push(...tasks);
+      saveTasksToLocalStorage(state.tasks);
     },
     deleteTask: (state, action: PayloadAction<string>) => {
       state.tasks = state.tasks.filter((t) => t.id !== action.payload);
+      saveTasksToLocalStorage(state.tasks);
     },
   },
 });
