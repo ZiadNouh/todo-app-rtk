@@ -13,7 +13,7 @@ A React-based Task Manager application featuring drag-and-drop functionality usi
 
 ## Demo
 
-![Task Manager Demo](link-to-your-demo-or-screenshot)
+![Task Manager Demo](https://todo-app-rtk-rho.vercel.app/)
 
 ## Technologies Used
 
